@@ -36,6 +36,14 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 - 网络控制常见形式：`--extraintf rc --rc-host <host:port>`
 - 核心原则：先确认连接可用，再执行操作；每次关键动作后做状态回读
 
+### C. 接口选择提示（Lua CLI / Telnet / oldrc）
+
+- `--extraintf rc` 通常加载 RC/CLI 接口，但不同版本会落在 Lua CLI 或 oldrc
+- Lua CLI 常见入口：`--rc-host <host:port>`、`--cli-host <source>`
+- Lua Telnet 常见入口：`--telnet-host`、`--telnet-port`、`--telnet-password`
+- oldrc 可见选项：`--rc-show-pos`、`--rc-quiet`、`--rc-host <host:port>`
+- 版本差异较大时，必须以运行时 `vlc --help` / `vlc -H` 与 RC `help` 为准
+
 ## 3) 标准操作流程（Agent 执行顺序）
 
 1. **预检**：确认 VLC 可执行、目标媒体路径/URL 有效、控制端点可达  
@@ -66,6 +74,16 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 | 播放列表查看/定位 | `playlist`（并结合条目 id 决策） |
 | 退出 | `quit` |
 
+## 4.0) CLI 帮助与能力探测（必须掌握）
+
+| 目的 | 命令 |
+|---|---|
+| 基础帮助 | `vlc --help` |
+| 完整帮助（更长） | `vlc -H` |
+| 模块帮助 | `vlc -p <module> --advanced --help-verbose` |
+
+说明：Windows 上 `vlc --help` 会生成帮助文本文件；输出过长时优先使用 `-H` 或模块级帮助。
+
 ## 4.1) 指令对照补充（按类别）
 
 > 与官方命令行帮助页对照时，建议按“启动参数 / RC 会话命令”两层核对。  
@@ -81,9 +99,20 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 | 叠加 RC 接口 | `--extraintf rc` |
 | RC 网络端点 | `--rc-host <host:port>` |
 | RC 本地 socket | `--rc-unix <path>` |
+| CLI/Telnet 接口 | `--cli-host <source>`、`--telnet-host`、`--telnet-port`、`--telnet-password` |
+| RC 行为 | `--rc-quiet`、`--rc-show-pos` |
 | 播放后退出 | `--play-and-exit` |
 | 起播时间 | `--start-time <sec>` |
 | 全屏起播 | `--fullscreen` |
+
+### A.1) 日志与静默（CLI）
+
+| 目标 | 常见参数 |
+|---|---|
+| 静默模式 | `-q` / `--quiet` |
+| 日志写文件 | `--file-logging`、`--logfile <path>` |
+| 日志格式 | `--logmode {text,html}` |
+| 日志级别 | `--log-verbose { -1,0,1,2,3 }` |
 
 ### B. RC 会话命令（控制面）
 
@@ -118,6 +147,12 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 - **输入安全**：路径/URL 参数禁止拼接不可信 shell 片段  
 - **幂等优先**：尽量使用可重复执行且副作用可控的步骤  
 - **用户意图保护**：涉及停止播放、切换媒体、退出会话需与用户目标一致
+
+## 6.1) 冷门/高级参数处理原则
+
+- 优先在 [reference/cli.txt](reference/cli.txt) 中定位对应模块与参数，再给出精确选项名
+- 若用户请求属于“视觉效果、视频输出、编码、滤镜、音频重采样”等高级模块，先用 `vlc -p <module> --advanced --help-verbose` 做二次确认
+- 仅在参考里存在的选项才可下结论；不确定时明确提示“需以当前 VLC 版本输出为准”
 
 ## 7) 验收标准（使用本 Skill 时）
 
