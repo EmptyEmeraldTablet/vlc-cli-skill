@@ -66,6 +66,41 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 | 播放列表查看/定位 | `playlist`（并结合条目 id 决策） |
 | 退出 | `quit` |
 
+## 4.1) 指令对照补充（按类别）
+
+> 与官方命令行帮助页对照时，建议按“启动参数 / RC 会话命令”两层核对。  
+> 不同版本命令可用性可能不同，统一以运行时 `vlc --help`、`vlc --longhelp`、RC `help` 输出为最终依据。
+
+### A. 启动与接口参数（CLI）
+
+| 目标 | 常见参数 |
+|---|---|
+| 查看帮助 | `--help`、`--longhelp` |
+| 列出模块/能力 | `--list` |
+| 指定界面 | `--intf <name>`（如 `dummy`、`rc`） |
+| 叠加 RC 接口 | `--extraintf rc` |
+| RC 网络端点 | `--rc-host <host:port>` |
+| RC 本地 socket | `--rc-unix <path>` |
+| 播放后退出 | `--play-and-exit` |
+| 起播时间 | `--start-time <sec>` |
+| 全屏起播 | `--fullscreen` |
+
+### B. RC 会话命令（控制面）
+
+| 类别 | 常见命令 |
+|---|---|
+| 基础控制 | `play`、`pause`、`stop`、`next`、`prev` |
+| 定位与进度 | `seek <value>`、`get_time`、`get_length` |
+| 媒体装载 | `add <mrl>`、`enqueue <mrl>` |
+| 列表管理 | `playlist`、`clear` |
+| 状态查询 | `status`、`info`、`stats` |
+| 播放模式 | `repeat`、`loop`、`random` |
+| 倍速控制 | `faster`、`slower`、`normal` |
+| 音量控制 | `volume <value>`、`volup`、`voldown` |
+| 轨道控制 | `atrack <id>`、`vtrack <id>`、`strack <id>` |
+| 章节/标题 | `chapter <id>`、`title <id>` |
+| 会话退出 | `quit` |
+
 ## 5) 常见失败场景与恢复策略
 
 | 场景 | 判定信号 | 恢复策略 |
@@ -90,3 +125,14 @@ description: Use when the user asks to control VLC through command line/RC/Telne
 - 每个关键动作都包含状态确认与结果反馈
 - 失败时给出可执行恢复路径，而非仅报错
 - 输出包含边界说明（版本/平台差异）与安全约束
+
+## 8) 典型请求验收样例（用于稳定性核对）
+
+- “把 A 加到队列并在当前播放结束后切换”  
+  - 期望：先 `status`，再 `enqueue`，再 `playlist` 回读确认
+- “跳到 01:30 并把音量调到 200”  
+  - 期望：执行 `seek` 与 `volume`，随后 `get_time` / `status` 校验
+- “切到下一条字幕轨并确认是否生效”  
+  - 期望：执行 `strack <id>`，随后 `info` 或 `status` 回读
+- “连接 RC 失败怎么办”  
+  - 期望：返回端点检查、重连顺序、最小重放命令方案
